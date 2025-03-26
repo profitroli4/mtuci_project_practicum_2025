@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Заголовок -->
+    <TextView
+        android:id="@+id/recognitionTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Результат распознавания"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_gravity="center"
+        android:layout_marginBottom="20dp"/>
+
+    <!-- Изображение распознанного объекта -->
+    <ImageView
+        android:id="@+id/recognizedImage"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_gravity="center"
+        android:src=""
+        android:contentDescription="Распознанный объект"
+        android:layout_marginBottom="20dp"/>
+
+    <!-- Информация о распознанном объекте -->
+    <TextView
+        android:id="@+id/recognizedInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Информация о распознанном объекте:..."
+        android:textSize="18sp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="20dp"
+        android:scrollHorizontally="false"
+        android:maxLines="5"
+        android:ellipsize="end"
+        android:padding="16dp"
+        android:lineSpacingExtra="8dp"/>
+
+    <!-- Вертикальный отступ перед кнопками -->
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="170dp" />
+
+    <!-- Кнопки для повторного распознавания и других действий -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="30dp">
+
+        <!-- Кнопка для выбора изображения -->
+        <Button
+            android:id="@+id/backButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/cameraa"
+            android:layout_marginEnd="8dp"
+            android:contentDescription="Назад"/>
+
+        <!-- Кнопка для повторного распознавания -->
+        <Button
+            android:id="@+id/retryButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/reload"
+            android:layout_marginEnd="8dp"
+            android:contentDescription="Повторить распознавание"/>
+
+        <!-- Кнопка для завершения -->
+        <Button
+            android:id="@+id/historyButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/history"
+            android:layout_marginEnd="8dp"
+            android:contentDescription="История распознавания"/>
+    </LinearLayout>
+
+</LinearLayout>
