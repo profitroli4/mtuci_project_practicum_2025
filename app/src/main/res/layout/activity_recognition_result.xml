@@ -22,9 +22,9 @@
         android:layout_width="match_parent"
         android:layout_height="250dp"
         android:layout_gravity="center"
-        android:src=""
         android:contentDescription="Распознанный объект"
         android:layout_marginBottom="20dp"/>
+    <!--android:src=""-->
 
     <!-- Информация о распознанном объекте -->
     <TextView
