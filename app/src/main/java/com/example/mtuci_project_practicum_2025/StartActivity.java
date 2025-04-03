@@ -31,7 +31,7 @@ public class StartActivity extends AppCompatActivity {
         }
 
         startButton.setOnClickListener(v -> {
-            Intent intent = new Intent(StartActivity.this, MainActivity.class);
+            Intent intent = new Intent(StartActivity.this, ChooseImageActivity.class);
             startActivity(intent);
             finish(); // Закрываем StartActivity
         });
