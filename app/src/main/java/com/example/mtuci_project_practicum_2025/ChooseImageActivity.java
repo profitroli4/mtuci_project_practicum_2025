@@ -25,6 +25,7 @@ public class ChooseImageActivity extends AppCompatActivity {
 
     private ImageView photoView;
     private TextView photoPlaceholder;
+    private Uri selectedImageUri = null;
 
     private ActivityResultLauncher<String> permissionLauncher;
     private ActivityResultLauncher<String> cameraPermissionLauncher;
@@ -50,9 +51,9 @@ public class ChooseImageActivity extends AppCompatActivity {
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        Uri selectedImage = result.getData().getData();
-                        Toast.makeText(this, "Выбрано: " + selectedImage, Toast.LENGTH_SHORT).show();
-                        showSelectedImage(selectedImage);
+                        selectedImageUri = result.getData().getData();
+                        Toast.makeText(this, "Выбрано: " + selectedImageUri, Toast.LENGTH_SHORT).show();
+                        showSelectedImage(selectedImageUri);
                     }
                 });
 
@@ -79,6 +80,15 @@ public class ChooseImageActivity extends AppCompatActivity {
         galleryButton.setOnClickListener(v -> checkAndRequestPermission());
         cameraButton.setOnClickListener(v -> checkAndRequestCameraPermission());
 
+        startRecognitionButton.setOnClickListener(v -> {
+            if (selectedImageUri != null) {
+                Intent intent = new Intent(this, ResultScreenActivity.class);
+                intent.putExtra("imageUri", selectedImageUri.toString());
+                startActivity(intent);
+            } else {
+                Toast.makeText(this, "Пожалуйста, выберите фото!", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         backButton.setOnClickListener(v -> {
             Intent intent = new Intent(this, StartActivity.class);
