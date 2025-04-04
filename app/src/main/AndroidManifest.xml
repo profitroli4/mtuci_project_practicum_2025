@@ -17,6 +17,9 @@
     <!-- Разрешение для Scoped Storage (для Android 11 и выше) -->
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" android:required="false"/>
 
+    <!-- Разрешение для записи фото -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -57,6 +60,15 @@
         <activity
             android:name=".ResultScreenActivity"
             android:theme="@style/Theme.Mtuci_project_practicum_2025"/>
+
+        <activity
+            android:name=".CameraActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
     </application>
 

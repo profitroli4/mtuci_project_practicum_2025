@@ -1,6 +1,7 @@
 package com.example.mtuci_project_practicum_2025;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -15,10 +16,11 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import com.bumptech.glide.Glide;
+
+import java.io.File;
 
 
 public class ChooseImageActivity extends AppCompatActivity {
@@ -39,7 +41,6 @@ public class ChooseImageActivity extends AppCompatActivity {
 
         Button cameraButton = findViewById(R.id.cameraButton);
         Button galleryButton = findViewById(R.id.galleryButton);
-        // Кнопка "Начать распознавание" нужно добавить дальнейшую обработку
         Button startRecognitionButton = findViewById(R.id.startRecognitionButton);
 
         ImageButton backButton = findViewById(R.id.backButton);
@@ -115,6 +116,7 @@ public class ChooseImageActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("IntentReset")
     private void openGallery() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         intent.setType("image/*");
@@ -129,9 +131,21 @@ public class ChooseImageActivity extends AppCompatActivity {
         }
     }
 
+
+    private final ActivityResultLauncher<Intent> cameraLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    String imagePath = result.getData().getStringExtra("selectedImageURL");
+                    assert imagePath != null;
+                    selectedImageUri = Uri.fromFile(new File(imagePath));
+                    showSelectedImage(selectedImageUri);
+                }
+            });
+
     private void openCameraActivity() {
         Intent intent = new Intent(this, CameraActivity.class);
-        startActivity(intent);
+        cameraLauncher.launch(intent);
     }
 
     private void showSelectedImage(Uri imageUri) {
