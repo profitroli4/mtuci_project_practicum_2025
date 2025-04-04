@@ -11,7 +11,7 @@
         android:id="@+id/titleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Название приложения"
+        android:text="Приложение"
         android:textSize="24sp"
         android:textStyle="bold"
         android:gravity="center"
@@ -21,7 +21,7 @@
         android:id="@+id/mainIcon"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:src="@drawable/reload"
+        android:src="@drawable/cameraa"
         android:layout_marginBottom="40dp"/>
 
     <Button
