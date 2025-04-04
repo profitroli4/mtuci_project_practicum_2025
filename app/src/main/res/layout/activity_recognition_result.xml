@@ -44,44 +44,53 @@
     <!-- Вертикальный отступ перед кнопками -->
     <Space
         android:layout_width="match_parent"
-        android:layout_height="170dp" />
+        android:layout_height="180dp" />
 
     <!-- Кнопки для повторного распознавания и других действий -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="30dp">
+        android:layout_marginTop="30dp"
+        android:gravity="center">
 
         <!-- Кнопка для выбора изображения -->
-        <Button
+        <ImageButton
             android:id="@+id/backButton"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="64dp"
             android:layout_weight="1"
-            android:background="@drawable/cameraa"
-            android:layout_marginEnd="8dp"
-            android:contentDescription="Назад"/>
+            android:src="@drawable/cameraa"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:contentDescription="Назад"
+            android:padding="12dp"/>
 
         <!-- Кнопка для повторного распознавания -->
-        <Button
+        <ImageButton
             android:id="@+id/retryButton"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="64dp"
             android:layout_weight="1"
-            android:background="@drawable/reload"
-            android:layout_marginEnd="8dp"
-            android:contentDescription="Повторить распознавание"/>
+            android:src="@drawable/reload"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:contentDescription="Повторить распознавание"
+            android:padding="12dp"/>
 
         <!-- Кнопка для завершения -->
-        <Button
+        <ImageButton
             android:id="@+id/historyButton"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="64dp"
             android:layout_weight="1"
-            android:background="@drawable/history"
-            android:layout_marginEnd="8dp"
-            android:contentDescription="История распознавания"/>
+            android:src="@drawable/history"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:contentDescription="История распознавания"
+            android:padding="12dp"/>
     </LinearLayout>
+
+
 
 </LinearLayout>
