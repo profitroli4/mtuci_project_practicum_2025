@@ -22,5 +22,65 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"/>
 
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="12dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="Назад"
+        android:src="@drawable/ic_back_arrow" />
+
+    <TextView
+        android:id="@+id/selectedPhotoText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/backButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:text="Выбранное фото"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <!-- Контейнер для изображения -->
+    <FrameLayout
+        android:id="@+id/photoContainer"
+        android:layout_width="293dp"
+        android:layout_height="331dp"
+        android:layout_below="@id/selectedPhotoText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:background="@android:color/darker_gray">
+
+        <!-- Изображение (если выбрано) -->
+        <ImageView
+            android:id="@+id/photoView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:visibility="gone" />
+
+        <!-- Текст "Пожалуйста, загрузите фото" -->
+        <TextView
+            android:id="@+id/photoPlaceholder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Пожалуйста, загрузите фото"
+            android:textColor="@android:color/white"
+            android:textSize="16sp" />
+    </FrameLayout>
+
+    <!-- Кнопка "Начать распознавание" -->
+    <Button
+        android:id="@+id/startRecognitionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/photoContainer"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:text="Начать распознавание" />
 
 </RelativeLayout>
