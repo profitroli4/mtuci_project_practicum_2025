@@ -21,6 +21,13 @@ import androidx.core.content.ContextCompat;
 import com.bumptech.glide.Glide;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.Date;
 
 
 public class ChooseImageActivity extends AppCompatActivity {
@@ -52,9 +59,48 @@ public class ChooseImageActivity extends AppCompatActivity {
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        selectedImageUri = result.getData().getData();
-                        Toast.makeText(this, "Выбрано: " + selectedImageUri, Toast.LENGTH_SHORT).show();
-                        showSelectedImage(selectedImageUri);
+                        Uri selectedUri = result.getData().getData();
+
+                        if (selectedUri == null) {
+                            Toast.makeText(this, "Ошибка: выбранный URI пуст", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+                        String imageFileName = "JPEG_" + timeStamp + "_";
+
+                        File storageDir = new File(getCacheDir(), "photos");
+                        if (!storageDir.exists()) {
+                            // Если папка не существует, создаем её
+                            if (!storageDir.mkdirs()) {
+                                Toast.makeText(this, "Ошибка создания папки для фото", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                        }
+
+                        File cachedFile = new File(storageDir, imageFileName + ".jpg");
+
+
+                        try (InputStream inputStream = getContentResolver().openInputStream(selectedUri)) {
+                            if (inputStream == null) {
+                                Toast.makeText(this, "Ошибка: не удалось открыть поток", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+
+                            try (OutputStream outputStream = new FileOutputStream(cachedFile)) {
+                                byte[] buffer = new byte[1024];
+                                int length;
+                                while ((length = inputStream.read(buffer)) != -1) {
+                                    outputStream.write(buffer, 0, length);
+                                }
+
+                                selectedImageUri = Uri.fromFile(cachedFile); // Используем ссылку на кешированное изображение
+                                Toast.makeText(this, "Выбрано: " + selectedImageUri, Toast.LENGTH_SHORT).show();
+                                showSelectedImage(selectedImageUri);
+                            }
+                        } catch (IOException e) {
+                            Toast.makeText(this, "Ошибка сохранения изображения в кеш", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
 
@@ -83,9 +129,27 @@ public class ChooseImageActivity extends AppCompatActivity {
 
         startRecognitionButton.setOnClickListener(v -> {
             if (selectedImageUri != null) {
-                Intent intent = new Intent(this, ResultScreenActivity.class);
-                intent.putExtra("imageUri", selectedImageUri.toString());
-                startActivity(intent);
+
+                Toast.makeText(this, "Распознавание...", Toast.LENGTH_SHORT).show();
+
+                ImageRecognition.recognizeObjectsFromImage(
+                        this,
+                        selectedImageUri,
+                        detectedObjects -> {
+
+                            if (ImageRecognition.recognitionResultFileUri != null) {
+                                Intent intent = new Intent(this, ResultScreenActivity.class);
+                                intent.putExtra("imageUri", selectedImageUri.toString());
+                                intent.putExtra("resultUri", ImageRecognition.recognitionResultFileUri.toString());
+                                startActivity(intent);
+                            } else {
+                                Toast.makeText(this, "Ошибка: JSON-файл не найден", Toast.LENGTH_SHORT).show();
+                            }
+                        },
+                        e -> {
+                            Toast.makeText(this, "Ошибка распознавания", Toast.LENGTH_SHORT).show();
+                        }
+                );
             } else {
                 Toast.makeText(this, "Пожалуйста, выберите фото!", Toast.LENGTH_SHORT).show();
             }

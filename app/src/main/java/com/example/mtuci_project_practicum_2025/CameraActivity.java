@@ -176,7 +176,14 @@ public class CameraActivity extends AppCompatActivity {
     private File createImageFile() {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File storageDir = new File(getCacheDir(), "photos");
+        if (!storageDir.exists()) {
+            // Если папка не существует, создаем её
+            if (!storageDir.mkdirs()) {
+                Toast.makeText(this, "Ошибка создания папки для фото", Toast.LENGTH_SHORT).show();
+                return null;
+            }
+        };
 
         try {
             return File.createTempFile(imageFileName, ".jpg", storageDir);

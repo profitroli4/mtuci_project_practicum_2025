@@ -41,6 +41,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.mlkit.objectdetection)
+    implementation(libs.mlkit.imagelabeling)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.core.ktx)
