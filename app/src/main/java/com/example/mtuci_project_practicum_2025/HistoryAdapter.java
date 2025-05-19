@@ -66,12 +66,10 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.HistoryV
             .error(R.drawable.image_placeholder)
             .placeholder(R.drawable.image_placeholder);
 
-        // Создаем File из пути к изображению
-        File imageFile = new File(item.getImageUri().getPath());
-        Log.d(TAG, "Загрузка изображения из файла: " + imageFile.getAbsolutePath());
+        Log.d(TAG, "Загрузка изображения из URI: " + item.getImageUri());
 
         Glide.with(holder.itemView.getContext())
-            .load(imageFile)
+            .load(item.getImageUri())
             .apply(options)
             .listener(new RequestListener<Drawable>() {
                 @Override

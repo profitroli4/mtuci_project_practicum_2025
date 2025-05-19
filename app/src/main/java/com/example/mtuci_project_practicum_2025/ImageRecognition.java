@@ -289,30 +289,8 @@ public class ImageRecognition {
     private static void saveRecognitionResults(Context context, Uri imageUri, List<ImageLabel> labels) throws JSONException, IOException {
         Log.d(TAG, "Начало сохранения результатов распознавания");
 
-        // Получаем реальный путь к файлу изображения
-        String imagePath = null;
-        if ("file".equals(imageUri.getScheme())) {
-            imagePath = imageUri.getPath();
-        } else {
-            try {
-                String[] projection = {android.provider.MediaStore.MediaColumns.DATA};
-                android.database.Cursor cursor = context.getContentResolver().query(imageUri, projection, null, null, null);
-                if (cursor != null && cursor.moveToFirst()) {
-                    int columnIndex = cursor.getColumnIndexOrThrow(android.provider.MediaStore.MediaColumns.DATA);
-                    imagePath = cursor.getString(columnIndex);
-                    cursor.close();
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Ошибка при получении пути к изображению", e);
-            }
-        }
-
-        if (imagePath == null) {
-            throw new IOException("Не удалось получить путь к изображению");
-        }
-
         JSONObject resultJson = new JSONObject();
-        resultJson.put("imageUri", imagePath); // Сохраняем полный путь к файлу
+        resultJson.put("imageUri", imageUri.toString()); // Сохраняем URI как строку
         resultJson.put("timestamp", System.currentTimeMillis());
 
         JSONArray labelsArray = new JSONArray();
@@ -335,7 +313,7 @@ public class ImageRecognition {
         File jsonFile = new File(dir, "result_" + timestamp + ".json");
 
         Log.d(TAG, "Сохранение результатов в файл: " + jsonFile.getAbsolutePath());
-        Log.d(TAG, "Путь к изображению: " + imagePath);
+        Log.d(TAG, "URI изображения: " + imageUri);
 
         try (FileOutputStream fos = new FileOutputStream(jsonFile)) {
             String jsonString = resultJson.toString(2);

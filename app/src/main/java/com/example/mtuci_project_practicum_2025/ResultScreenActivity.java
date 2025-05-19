@@ -89,6 +89,8 @@ public class ResultScreenActivity extends AppCompatActivity {
     }
 
     private void loadImage(Uri imageUri) {
+        Log.d(TAG, "Загрузка изображения из URI: " + imageUri);
+        
         RequestOptions options = new RequestOptions()
             .diskCacheStrategy(DiskCacheStrategy.NONE)
             .skipMemoryCache(true)
@@ -101,13 +103,14 @@ public class ResultScreenActivity extends AppCompatActivity {
             .listener(new RequestListener<Drawable>() {
                 @Override
                 public boolean onLoadFailed(@Nullable GlideException e, @Nullable Object model, @NonNull Target<Drawable> target, boolean isFirstResource) {
-                    Log.e(TAG, "Ошибка загрузки изображения", e);
+                    Log.e(TAG, "Ошибка загрузки изображения: " + e.getMessage(), e);
                     showError("Не удалось загрузить изображение");
                     return false;
                 }
 
                 @Override
                 public boolean onResourceReady(@NonNull Drawable resource, @NonNull Object model, @NonNull Target<Drawable> target, @NonNull DataSource dataSource, boolean isFirstResource) {
+                    Log.d(TAG, "Изображение успешно загружено");
                     return false;
                 }
             })

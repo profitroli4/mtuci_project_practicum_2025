@@ -92,7 +92,7 @@ public class HistoryActivity extends AppCompatActivity {
                 String jsonContent = readJsonFile(file);
                 JSONObject jsonObject = new JSONObject(jsonContent);
                 
-                String imageUri = jsonObject.getString("imageUri");
+                String imageUriString = jsonObject.getString("imageUri");
                 long timestamp = jsonObject.getLong("timestamp");
                 
                 JSONArray labels = jsonObject.getJSONArray("labels");
@@ -103,8 +103,11 @@ public class HistoryActivity extends AppCompatActivity {
                     previewText.append(label.getString("text"));
                 }
 
+                Uri imageUri = Uri.parse(imageUriString);
+                Log.d(TAG, "Загружен URI изображения: " + imageUri);
+
                 HistoryItem item = new HistoryItem(
-                    Uri.parse(imageUri),
+                    imageUri,
                     Uri.fromFile(file),
                     new Date(timestamp),
                     previewText.toString(),
