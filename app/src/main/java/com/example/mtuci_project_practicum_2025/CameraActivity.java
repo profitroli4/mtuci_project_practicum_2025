@@ -3,10 +3,12 @@ package com.example.mtuci_project_practicum_2025;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -37,6 +39,11 @@ import java.util.concurrent.Executor;
 
 public class CameraActivity extends AppCompatActivity {
 
+    private static final String[] REQUIRED_PERMISSIONS = {
+            Manifest.permission.CAMERA,
+            Build.VERSION.SDK_INT <= Build.VERSION_CODES.P ? Manifest.permission.WRITE_EXTERNAL_STORAGE : ""
+    };
+
     private PreviewView viewFinder;
     private ImageView capturedImage;
     private Button captureButton, retakeButton;
@@ -44,8 +51,9 @@ public class CameraActivity extends AppCompatActivity {
     private ImageCapture imageCapture;
     private Executor executor;
     private File photoFile;
+    private ProcessCameraProvider cameraProvider;
 
-    private ActivityResultLauncher<String> storagePermissionLauncher;
+    private ActivityResultLauncher<String[]> permissionsLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,23 +68,63 @@ public class CameraActivity extends AppCompatActivity {
         retakeButton = findViewById(R.id.retakeButton);
         acceptButton = findViewById(R.id.acceptButton);
 
-        storagePermissionLauncher = registerForActivityResult(
-                new ActivityResultContracts.RequestPermission(),
-                isGranted -> {
-                    if (isGranted) {
-                        returnToChooseImageActivity();
+        permissionsLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestMultiplePermissions(),
+                permissions -> {
+                    boolean allGranted = true;
+                    for (Boolean isGranted : permissions.values()) {
+                        allGranted &= isGranted;
+                    }
+                    if (allGranted) {
+                        startCamera();
                     } else {
                         Toast.makeText(this,
-                                "Для сохранения фото необходимо разрешение на запись в хранилище",
-                                Toast.LENGTH_SHORT).show();
+                                "Для работы приложения необходимы разрешения на камеру и хранилище",
+                                Toast.LENGTH_LONG).show();
+                        finish();
                     }
                 });
 
+        if (allPermissionsGranted()) {
         startCamera();
+        } else {
+            requestPermissions();
+        }
 
         captureButton.setOnClickListener(v -> takePhoto());
         retakeButton.setOnClickListener(v -> retakePhoto());
-        acceptButton.setOnClickListener(v -> checkStoragePermissionAndReturn());
+        acceptButton.setOnClickListener(v -> returnToChooseImageActivity());
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // Пересоздаем превью камеры при повороте экрана
+        if (cameraProvider != null) {
+            startCamera();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (cameraProvider != null) {
+            cameraProvider.unbindAll();
+        }
+    }
+
+    private boolean allPermissionsGranted() {
+        for (String permission : REQUIRED_PERMISSIONS) {
+            if (permission.isEmpty()) continue;
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void requestPermissions() {
+        permissionsLauncher.launch(REQUIRED_PERMISSIONS);
     }
 
     private void startCamera() {
@@ -85,7 +133,7 @@ public class CameraActivity extends AppCompatActivity {
 
         cameraProviderFuture.addListener(() -> {
             try {
-                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
+                cameraProvider = cameraProviderFuture.get();
 
                 Preview preview = new Preview.Builder()
                         .build();
@@ -101,13 +149,17 @@ public class CameraActivity extends AppCompatActivity {
                         this, cameraSelector, preview, imageCapture
                 );
             } catch (ExecutionException | InterruptedException e) {
-                Toast.makeText(this, "Ошибка инициализации камеры", Toast.LENGTH_SHORT).show();
+                String errorMessage = "Ошибка инициализации камеры: " + e.getMessage();
+                Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
             }
         }, executor);
     }
 
     private void takePhoto() {
-        if (imageCapture == null) return;
+        if (imageCapture == null) {
+            Toast.makeText(this, "Камера не инициализирована", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         photoFile = createImageFile();
         if (photoFile == null) {
@@ -125,40 +177,36 @@ public class CameraActivity extends AppCompatActivity {
                     @Override
                     public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                         runOnUiThread(() -> {
+                            try {
                             capturedImage.setImageURI(Uri.fromFile(photoFile));
                             capturedImage.setVisibility(View.VISIBLE);
                             viewFinder.setVisibility(View.GONE);
                             captureButton.setVisibility(View.GONE);
                             retakeButton.setVisibility(View.VISIBLE);
                             acceptButton.setVisibility(View.VISIBLE);
+                            } catch (Exception e) {
+                                Toast.makeText(CameraActivity.this,
+                                        "Ошибка отображения фото: " + e.getMessage(),
+                                        Toast.LENGTH_SHORT).show();
+                            }
                         });
                     }
 
                     @Override
                     public void onError(@NonNull ImageCaptureException exception) {
-                        Toast.makeText(CameraActivity.this, "Ошибка сохранения фото", Toast.LENGTH_SHORT).show();
+                        runOnUiThread(() -> {
+                            String errorMessage = "Ошибка сохранения фото: " + exception.getMessage();
+                            Toast.makeText(CameraActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                        });
                     }
                 }
         );
     }
 
-    private void checkStoragePermissionAndReturn() {
-        if (photoFile == null) {
-            Toast.makeText(this, "Фото не найдено", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Для Android 10 (API 29) и выше разрешение WRITE_EXTERNAL_STORAGE не требуется
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        == PackageManager.PERMISSION_GRANTED) {
-            returnToChooseImageActivity();
-        } else {
-            storagePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
-    }
-
     private void retakePhoto() {
+        if (photoFile != null && photoFile.exists()) {
+            photoFile.delete();
+        }
         capturedImage.setVisibility(View.GONE);
         viewFinder.setVisibility(View.VISIBLE);
         retakeButton.setVisibility(View.GONE);
@@ -167,6 +215,11 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void returnToChooseImageActivity() {
+        if (photoFile == null || !photoFile.exists()) {
+            Toast.makeText(this, "Фото не найдено", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Intent intent = new Intent();
         intent.putExtra("selectedImageURL", photoFile.getAbsolutePath());
         setResult(RESULT_OK, intent);
@@ -176,19 +229,27 @@ public class CameraActivity extends AppCompatActivity {
     private File createImageFile() {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = new File(getCacheDir(), "photos");
-        if (!storageDir.exists()) {
-            // Если папка не существует, создаем её
-            if (!storageDir.mkdirs()) {
-                Toast.makeText(this, "Ошибка создания папки для фото", Toast.LENGTH_SHORT).show();
+        File storageDir;
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Для Android 10 и выше используем getExternalFilesDir
+            storageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "Camera");
+        } else {
+            // Для более старых версий используем общую директорию фотографий
+            storageDir = new File(Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_PICTURES), "Camera");
+        }
+
+        if (!storageDir.exists() && !storageDir.mkdirs()) {
+            Log.e("CameraActivity", "Не удалось создать директорию: " + storageDir.getPath());
                 return null;
             }
-        };
 
         try {
-            return File.createTempFile(imageFileName, ".jpg", storageDir);
+            File image = File.createTempFile(imageFileName, ".jpg", storageDir);
+            return image;
         } catch (IOException e) {
-            Toast.makeText(this, "Ошибка создания файла", Toast.LENGTH_SHORT).show();
+            Log.e("CameraActivity", "Ошибка создания файла: " + e.getMessage());
             return null;
         }
     }

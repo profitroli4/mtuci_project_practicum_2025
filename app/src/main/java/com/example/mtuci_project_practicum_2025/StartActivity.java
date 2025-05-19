@@ -37,7 +37,8 @@ public class StartActivity extends AppCompatActivity {
         });
 
         historyButton.setOnClickListener(v -> {
-            // Пока что пусто, можно потом добавить активити истории
+            Intent intent = new Intent(StartActivity.this, HistoryActivity.class);
+            startActivity(intent);
         });
     }
 
