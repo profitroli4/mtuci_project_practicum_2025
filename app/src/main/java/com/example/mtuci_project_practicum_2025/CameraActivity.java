@@ -221,7 +221,7 @@ public class CameraActivity extends AppCompatActivity {
         }
 
         Intent intent = new Intent();
-        intent.putExtra("selectedImageURL", photoFile.getAbsolutePath());
+        intent.putExtra("imageUri", Uri.fromFile(photoFile).toString());
         setResult(RESULT_OK, intent);
         finish();
     }

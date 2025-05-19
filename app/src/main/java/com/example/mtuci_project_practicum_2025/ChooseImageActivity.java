@@ -127,9 +127,11 @@ public class ChooseImageActivity extends AppCompatActivity {
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        Uri photoUri = result.getData().getData();
-                        if (photoUri != null) {
-                            startRecognition(photoUri);
+                        String imageUriString = result.getData().getStringExtra("imageUri");
+                        if (imageUriString != null) {
+                            Uri photoUri = Uri.parse(imageUriString);
+                            selectedImageUri = photoUri;
+                            showSelectedImage(photoUri);
                         }
                     }
                 });
